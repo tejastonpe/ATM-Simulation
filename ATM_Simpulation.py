@@ -35,19 +35,57 @@ def draw_cash(amount_withdraw):
             raise ValueError("Maximum number of notes, ATM can't withdraw")
         
         for rupee,numbers in total_notes.items():
-            print(f"for {amount_withdraw} Rs,{rupee} Rs {numbers} notes")
+            print(f"for {amount_withdraw} Rs: {rupee} Rs-{numbers} notes")
 
     except ValueError as v:
         logger.error(f"Error in draw cash function:{v}")
 
+def update_atm_amount_distribution(operation,operation_amount):
+    if operation == "add":
+        key,value= operation_amount
+        atm_amount_distribution[key]+=value 
+        if atm_amount_distribution[key]>500:
+            print("Cant add more than 500 notes")
+            atm_amount_distribution[key]-=value
+            
+        
+    elif operation == "withdraw":
+        key,value = operation_amount
+        atm_amount_distribution[key]-=value
+        if atm_amount_distribution[key] < 0:
+            print("Can't withdraw more than 500 notes")
+            atm_amount_distribution[key]+=value                      
+
 def main():
     try:
-        display_atm_amount()
-        display_total_amount()
-        amount_withdraw = int(input("\nEnter amount you want to withdraw form ATM: "))
-        draw_cash(amount_withdraw)
-        display_atm_amount()
-        display_total_amount()
+        print("\n1-Display ATm amount per rupee denomination \n2-Display Total ATM amount \n3- Draw cash from ATM \n4-update atm amount distribution")
+        choice=int(input("\nEnter option: "))
+        match choice:
+            case 1:
+                display_atm_amount()
+                main()
+            case 2:
+                 display_total_amount()
+                 main()
+            case 3:
+                amount_withdraw = int(input("\nEnter amount you want to withdraw form ATM: "))
+                draw_cash(amount_withdraw)
+                main()
+            case 4:
+                print("\n1-Add money \n2-Withdraw money")
+                inp=input("\nEnter option: ")
+                if inp=='1':
+                    money=tuple(map(int,input("Enter amount you want to add in key-value pair: ").split()))
+                    update_atm_amount_distribution("add",money)
+                    main()
+                elif inp=="2":
+                    money=tuple(map(int,input("Enter amount you want to withdraw in key-value pair: ").split()))
+                    update_atm_amount_distribution("withdraw",money)
+                    main()
+            case _:
+                print("Invalid option")
+                main()
+       
     except Exception as e:
         logger.error("Error in main: %s",e)
         main()
